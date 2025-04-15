@@ -187,7 +187,7 @@ const Home = () => {
                       </span>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Skills</SelectItem>
+                      <SelectItem value="all">All Skills</SelectItem>
                       <SelectItem value="Web Development">Web Development</SelectItem>
                       <SelectItem value="Graphic Design">Graphic Design</SelectItem>
                       <SelectItem value="Content Writing">Content Writing</SelectItem>
@@ -204,7 +204,7 @@ const Home = () => {
                       </span>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="in-progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
@@ -219,7 +219,7 @@ const Home = () => {
                       </span>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any Reward</SelectItem>
+                      <SelectItem value="all">Any Reward</SelectItem>
                       <SelectItem value="low">Up to $100</SelectItem>
                       <SelectItem value="medium">$100 - $250</SelectItem>
                       <SelectItem value="high">$250+</SelectItem>
@@ -270,7 +270,7 @@ const Home = () => {
                       </span>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="in-progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
