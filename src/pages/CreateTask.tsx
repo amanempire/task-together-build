@@ -21,10 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Plus, Trash2, ArrowDown, ArrowUp, ListTodo } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SubtaskProps } from "@/components/TaskCard";
 
 const allSkills = [
   "Web Development",
@@ -48,6 +49,8 @@ const CreateTask = () => {
   const [skills, setSkills] = useState<string[]>([]);
   const [deadline, setDeadline] = useState("");
   const [reward, setReward] = useState("");
+  const [subtasks, setSubtasks] = useState<SubtaskProps[]>([]);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddSkill = (skill: string) => {
@@ -58,6 +61,202 @@ const CreateTask = () => {
 
   const handleRemoveSkill = (skill: string) => {
     setSkills(skills.filter((s) => s !== skill));
+  };
+
+  const handleAddSubtask = () => {
+    if (!newSubtaskTitle.trim()) {
+      toast.error("Subtask title cannot be empty");
+      return;
+    }
+
+    const newSubtask: SubtaskProps = {
+      id: `new-${Date.now()}`,
+      title: newSubtaskTitle,
+      completed: false,
+    };
+
+    setSubtasks([...subtasks, newSubtask]);
+    setNewSubtaskTitle("");
+  };
+
+  const handleAddNestedSubtask = (parentId: string) => {
+    // Find the subtask input field by parent ID
+    const inputElement = document.getElementById(`nested-subtask-${parentId}`) as HTMLInputElement;
+    if (!inputElement || !inputElement.value.trim()) {
+      toast.error("Nested subtask title cannot be empty");
+      return;
+    }
+
+    // Function to add nested subtask to a parent
+    const addNestedSubtask = (items: SubtaskProps[], parentId: string, newSubtask: SubtaskProps): SubtaskProps[] => {
+      return items.map(item => {
+        if (item.id === parentId) {
+          // Add to this item's subtasks
+          const updatedSubtasks = item.subtasks ? [...item.subtasks, newSubtask] : [newSubtask];
+          return { ...item, subtasks: updatedSubtasks };
+        } else if (item.subtasks) {
+          // Check this item's subtasks recursively
+          return {
+            ...item,
+            subtasks: addNestedSubtask(item.subtasks, parentId, newSubtask)
+          };
+        }
+        return item;
+      });
+    };
+
+    const newNestedSubtask: SubtaskProps = {
+      id: `new-${Date.now()}`,
+      title: inputElement.value,
+      completed: false,
+    };
+
+    setSubtasks(prev => addNestedSubtask(prev, parentId, newNestedSubtask));
+    inputElement.value = "";
+  };
+
+  const handleRemoveSubtask = (subtaskId: string) => {
+    // Function to remove a subtask from the tree
+    const removeSubtaskById = (items: SubtaskProps[], id: string): SubtaskProps[] => {
+      // Filter out the subtask with matching id at this level
+      const filteredItems = items.filter(item => item.id !== id);
+      
+      // Recursively check remaining subtasks
+      return filteredItems.map(item => {
+        if (item.subtasks) {
+          return {
+            ...item,
+            subtasks: removeSubtaskById(item.subtasks, id)
+          };
+        }
+        return item;
+      });
+    };
+
+    setSubtasks(prev => removeSubtaskById(prev, subtaskId));
+  };
+
+  const moveSubtask = (subtaskId: string, direction: 'up' | 'down') => {
+    // Function to find and move a subtask within its parent array
+    const moveSubtaskInArray = (items: SubtaskProps[], id: string, direction: 'up' | 'down'): SubtaskProps[] => {
+      // Find the index of the subtask in this level
+      const index = items.findIndex(item => item.id === id);
+      
+      // If not found at this level, recursively check subtasks
+      if (index === -1) {
+        return items.map(item => {
+          if (item.subtasks) {
+            return {
+              ...item,
+              subtasks: moveSubtaskInArray(item.subtasks, id, direction)
+            };
+          }
+          return item;
+        });
+      }
+      
+      // Found at this level, perform the move
+      const newItems = [...items];
+      if (direction === 'up' && index > 0) {
+        // Swap with previous item
+        [newItems[index], newItems[index - 1]] = [newItems[index - 1], newItems[index]];
+      } else if (direction === 'down' && index < items.length - 1) {
+        // Swap with next item
+        [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+      }
+      
+      return newItems;
+    };
+
+    setSubtasks(prev => moveSubtaskInArray(prev, subtaskId, direction));
+  };
+
+  const renderSubtasks = (items: SubtaskProps[], level = 0) => {
+    return items.map((subtask, index) => (
+      <div 
+        key={subtask.id} 
+        className={`pl-${level * 4} py-2 border-l-2 ${level > 0 ? 'ml-6' : ''} border-gray-200 mt-2`}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2">
+            <ListTodo className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium">{subtask.title}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={(e) => {
+                e.preventDefault();
+                moveSubtask(subtask.id, 'up');
+              }}
+              disabled={index === 0}
+            >
+              <ArrowUp className="h-4 w-4" />
+              <span className="sr-only">Move up</span>
+            </Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={(e) => {
+                e.preventDefault();
+                moveSubtask(subtask.id, 'down');
+              }}
+              disabled={index === items.length - 1}
+            >
+              <ArrowDown className="h-4 w-4" />
+              <span className="sr-only">Move down</span>
+            </Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 text-red-500" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleRemoveSubtask(subtask.id);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Remove</span>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Render existing nested subtasks */}
+        {subtask.subtasks && subtask.subtasks.length > 0 && (
+          <div className="mt-2">
+            {renderSubtasks(subtask.subtasks, level + 1)}
+          </div>
+        )}
+        
+        {/* Add nested subtask input */}
+        <div className="mt-2 ml-6 flex items-center gap-2">
+          <Input
+            id={`nested-subtask-${subtask.id}`}
+            placeholder="Add a nested subtask..."
+            className="h-8 text-sm"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8"
+            onClick={(e) => {
+              e.preventDefault();
+              handleAddNestedSubtask(subtask.id);
+            }}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Add
+          </Button>
+        </div>
+      </div>
+    ));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -201,6 +400,42 @@ const CreateTask = () => {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Subtasks Section */}
+                <div className="space-y-2">
+                  <Label>Subtasks</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Add a subtask..."
+                      value={newSubtaskTitle}
+                      onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddSubtask();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddSubtask}
+                      variant="outline"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {subtasks.length > 0 ? (
+                    <div className="mt-4 border rounded-md p-3 bg-gray-50">
+                      {renderSubtasks(subtasks)}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No subtasks added yet
+                    </p>
+                  )}
                 </div>
               </form>
             </CardContent>
