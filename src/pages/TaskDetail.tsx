@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -41,7 +40,6 @@ import Footer from "@/components/Footer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SubtaskProps } from "@/components/TaskCard";
 
-// Sample task data
 const taskData = {
   id: "1",
   title: "Build a responsive landing page",
@@ -107,7 +105,6 @@ const taskData = {
   ]
 };
 
-// Sample my task data (when the user is the owner)
 const myTaskData = {
   ...taskData,
   isMyTask: true,
@@ -130,7 +127,7 @@ const SubtaskItem = ({
   onDeleteSubtask: (id: string) => void;
   isMyTask: boolean;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const hasSubtasks = subtask.subtasks && subtask.subtasks.length > 0;
@@ -183,14 +180,16 @@ const SubtaskItem = ({
           {isMyTask && (
             <>
               <button 
-                onClick={() => onAddSubtask(subtask.id)}
+                onClick={() => setShowAddForm(true)}
                 className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label="Add subtask"
               >
                 <Plus className="h-4 w-4" />
               </button>
               <button 
                 onClick={() => onDeleteSubtask(subtask.id)}
                 className="ml-2 text-gray-500 hover:text-red-500 focus:outline-none"
+                aria-label="Delete subtask"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -201,6 +200,7 @@ const SubtaskItem = ({
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              aria-label={isExpanded ? "Collapse subtasks" : "Expand subtasks"}
             >
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
@@ -258,12 +258,9 @@ const TaskDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   
-  // In a real application, you would fetch the task data based on taskId
-  // For this demo, we'll just determine if it's the user's task or not
   const isMyTask = taskId === "5" || taskId === "6";
   const task = isMyTask ? myTaskData : taskData;
   
-  // Calculate days remaining
   const deadlineDate = new Date(task.deadline);
   const currentDate = new Date();
   const timeDiff = deadlineDate.getTime() - currentDate.getTime();
@@ -277,7 +274,6 @@ const TaskDetail = () => {
     
     setIsSubmitting(true);
 
-    // Simulate submitting application
     setTimeout(() => {
       setIsSubmitting(false);
       toast.success("Application submitted successfully!");
@@ -286,33 +282,27 @@ const TaskDetail = () => {
   };
 
   const handleAcceptApplicant = (applicantId: string) => {
-    // Simulate accepting applicant
     toast.success("Applicant accepted successfully!");
   };
 
   const handleMessageApplicant = (applicantId: string) => {
-    // Simulate messaging applicant
     toast.success("Message feature coming soon!");
   };
   
   const handleToggleSubtaskComplete = (subtaskId: string) => {
-    // In a real app, you would update the state properly
     toast.success(`Toggled subtask ${subtaskId} completion status`);
   };
   
   const handleAddSubtask = (parentId: string) => {
-    // In a real app, you would update the state properly
     toast.success(`Adding subtask to ${parentId}`);
   };
   
   const handleDeleteSubtask = (subtaskId: string) => {
-    // In a real app, you would update the state properly
     toast.success(`Deleted subtask ${subtaskId}`);
   };
   
   const handleAddRootSubtask = () => {
     if (newSubtaskTitle.trim()) {
-      // In a real app, you would update the state properly
       toast.success(`Added new root subtask: ${newSubtaskTitle}`);
       setNewSubtaskTitle("");
     } else {
@@ -381,46 +371,43 @@ const TaskDetail = () => {
                     </div>
                   </div>
 
-                  {/* Subtasks Section */}
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Subtasks</h3>
-                      {isMyTask && (
-                        <div className="flex items-center">
-                          <Input
-                            placeholder="New subtask"
-                            value={newSubtaskTitle}
-                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                            className="mr-2 w-64"
+                    <h3 className="font-semibold">Subtasks</h3>
+                    {isMyTask && (
+                      <div className="flex items-center">
+                        <Input
+                          placeholder="New subtask"
+                          value={newSubtaskTitle}
+                          onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                          className="mr-2 w-64"
+                        />
+                        <Button size="sm" onClick={handleAddRootSubtask}>
+                          <Plus className="h-4 w-4 mr-1" /> Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border bg-card p-4">
+                    {task.subtasks && task.subtasks.length > 0 ? (
+                      <div>
+                        {task.subtasks.map((subtask) => (
+                          <SubtaskItem
+                            key={subtask.id}
+                            subtask={subtask}
+                            parentId="root"
+                            onToggleComplete={handleToggleSubtaskComplete}
+                            onAddSubtask={handleAddSubtask}
+                            onDeleteSubtask={handleDeleteSubtask}
+                            isMyTask={isMyTask}
                           />
-                          <Button size="sm" onClick={handleAddRootSubtask}>
-                            <Plus className="h-4 w-4 mr-1" /> Add
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="rounded-lg border bg-card p-4">
-                      {task.subtasks && task.subtasks.length > 0 ? (
-                        <div>
-                          {task.subtasks.map((subtask) => (
-                            <SubtaskItem
-                              key={subtask.id}
-                              subtask={subtask}
-                              parentId="root"
-                              onToggleComplete={handleToggleSubtaskComplete}
-                              onAddSubtask={handleAddSubtask}
-                              onDeleteSubtask={handleDeleteSubtask}
-                              isMyTask={isMyTask}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-center text-muted-foreground py-4">
-                          No subtasks created yet
-                        </p>
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground py-4">
+                        No subtasks created yet
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

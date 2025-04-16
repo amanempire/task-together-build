@@ -1,4 +1,3 @@
-
 import { TaskCardProps } from "@/components/TaskCard";
 
 // Sample data for tasks
@@ -25,11 +24,23 @@ export const sampleTasks: TaskCardProps[] = [
             id: "1-1-1",
             title: "Design navigation menu",
             completed: true,
+            subtasks: [
+              {
+                id: "1-1-1-1",
+                title: "Create mobile menu toggle",
+                completed: false
+              },
+              {
+                id: "1-1-1-2",
+                title: "Style dropdown menus",
+                completed: false
+              }
+            ]
           },
           {
             id: "1-1-2",
             title: "Implement responsive logo",
-            completed: false,
+            completed: false
           }
         ]
       },
@@ -37,11 +48,23 @@ export const sampleTasks: TaskCardProps[] = [
         id: "1-2",
         title: "Build hero section with CTA",
         completed: false,
+        subtasks: [
+          {
+            id: "1-2-1",
+            title: "Design hero image",
+            completed: false
+          },
+          {
+            id: "1-2-2",
+            title: "Write compelling headline",
+            completed: false
+          }
+        ]
       },
       {
         id: "1-3",
         title: "Create testimonials carousel",
-        completed: false,
+        completed: false
       }
     ]
   },
@@ -119,16 +142,28 @@ export const myTasks: TaskCardProps[] = [
         id: "5-1",
         title: "Competitive analysis",
         completed: true,
+        subtasks: [
+          {
+            id: "5-1-1",
+            title: "Research top 5 competitors",
+            completed: true
+          },
+          {
+            id: "5-1-2",
+            title: "Analyze engagement metrics",
+            completed: false
+          }
+        ]
       },
       {
         id: "5-2",
         title: "Content calendar for first month",
-        completed: false,
+        completed: false
       },
       {
         id: "5-3",
         title: "KPI definition and tracking plan",
-        completed: false,
+        completed: false
       }
     ]
   },

@@ -57,30 +57,56 @@ const TaskCard = ({
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
   
   // Calculate subtask completion stats
-  const completedSubtasks = subtasks.filter(subtask => subtask.completed).length;
-  const totalSubtasks = subtasks.length;
+  const countAllSubtasks = (items: SubtaskProps[]): number => {
+    return items.reduce((count, item) => {
+      // Count this subtask
+      let total = 1;
+      // If it has subtasks, count them recursively
+      if (item.subtasks && item.subtasks.length > 0) {
+        total += countAllSubtasks(item.subtasks);
+      }
+      return count + total;
+    }, 0);
+  };
+  
+  const countCompletedSubtasks = (items: SubtaskProps[]): number => {
+    return items.reduce((count, item) => {
+      // Count this subtask if completed
+      let completedCount = item.completed ? 1 : 0;
+      // If it has subtasks, count completed ones recursively
+      if (item.subtasks && item.subtasks.length > 0) {
+        completedCount += countCompletedSubtasks(item.subtasks);
+      }
+      return count + completedCount;
+    }, 0);
+  };
+  
+  const completedSubtasks = countCompletedSubtasks(subtasks);
+  const totalSubtasks = countAllSubtasks(subtasks);
   const hasSubtasks = totalSubtasks > 0;
 
   const renderSubtasks = (items: SubtaskProps[], level = 0) => {
     return items.map((subtask) => (
       <div 
         key={subtask.id} 
-        className={`pl-${level * 4} py-2 border-b last:border-b-0 flex items-start`}
+        className={`pl-${level * 4} py-2 border-b last:border-b-0 flex items-start gap-2`}
       >
-        <div className="flex items-center">
-          <CheckSquare 
-            className={`h-4 w-4 mr-2 ${subtask.completed ? "text-green-500" : "text-gray-300"}`} 
-          />
-          <span className={`text-sm ${subtask.completed ? "line-through text-gray-500" : ""}`}>
-            {subtask.title}
-          </span>
-        </div>
-        
-        {subtask.subtasks && subtask.subtasks.length > 0 && (
-          <div className="ml-6">
-            {renderSubtasks(subtask.subtasks, level + 1)}
+        <div className="flex-1">
+          <div className="flex items-center">
+            <CheckSquare 
+              className={`h-4 w-4 mr-2 ${subtask.completed ? "text-green-500" : "text-gray-300"}`} 
+            />
+            <span className={`text-sm ${subtask.completed ? "line-through text-gray-500" : ""}`}>
+              {subtask.title}
+            </span>
           </div>
-        )}
+          
+          {subtask.subtasks && subtask.subtasks.length > 0 && (
+            <div className="mt-2 ml-6 border-l-2 pl-2 border-gray-200">
+              {renderSubtasks(subtask.subtasks, level + 1)}
+            </div>
+          )}
+        </div>
       </div>
     ));
   };
