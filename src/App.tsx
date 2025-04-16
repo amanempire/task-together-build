@@ -7,6 +7,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
+import GetStarted from "./pages/GetStarted";
 import Home from "./pages/Home";
 import CreateTask from "./pages/CreateTask";
 import TaskDetail from "./pages/TaskDetail";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="/get-started" element={<GetStarted />} />
           <Route path="/home" element={<Home />} />
           <Route path="/create-task" element={<CreateTask />} />
           <Route path="/task/:taskId" element={<TaskDetail />} />

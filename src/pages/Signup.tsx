@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,7 @@ const Signup = () => {
     setTimeout(() => {
       setIsLoading(false);
       toast.success("Account created successfully!");
-      navigate("/profile-setup");
+      navigate("/get-started");
     }, 1500);
   };
 
@@ -48,7 +47,7 @@ const Signup = () => {
     setTimeout(() => {
       setIsLoading(false);
       toast.success("Google signup successful!");
-      navigate("/profile-setup");
+      navigate("/get-started");
     }, 1500);
   };
 
