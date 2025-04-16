@@ -2,8 +2,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Clock, Calendar } from "lucide-react";
+import { Clock, Calendar, ChevronDown, ChevronUp, CheckSquare } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+export interface SubtaskProps {
+  id: string;
+  title: string;
+  completed: boolean;
+  subtasks?: SubtaskProps[];
+}
 
 export interface TaskCardProps {
   id: string;
@@ -22,6 +31,7 @@ export interface TaskCardProps {
   }[];
   status?: "open" | "in-progress" | "completed";
   isMyTask?: boolean;
+  subtasks?: SubtaskProps[];
 }
 
 const TaskCard = ({
@@ -35,12 +45,45 @@ const TaskCard = ({
   contributors,
   status = "open",
   isMyTask = false,
+  subtasks = [],
 }: TaskCardProps) => {
   // Calculate days remaining
   const deadlineDate = new Date(deadline);
   const currentDate = new Date();
   const timeDiff = deadlineDate.getTime() - currentDate.getTime();
   const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  
+  // State to track if subtasks are expanded
+  const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
+  
+  // Calculate subtask completion stats
+  const completedSubtasks = subtasks.filter(subtask => subtask.completed).length;
+  const totalSubtasks = subtasks.length;
+  const hasSubtasks = totalSubtasks > 0;
+
+  const renderSubtasks = (items: SubtaskProps[], level = 0) => {
+    return items.map((subtask) => (
+      <div 
+        key={subtask.id} 
+        className={`pl-${level * 4} py-2 border-b last:border-b-0 flex items-start`}
+      >
+        <div className="flex items-center">
+          <CheckSquare 
+            className={`h-4 w-4 mr-2 ${subtask.completed ? "text-green-500" : "text-gray-300"}`} 
+          />
+          <span className={`text-sm ${subtask.completed ? "line-through text-gray-500" : ""}`}>
+            {subtask.title}
+          </span>
+        </div>
+        
+        {subtask.subtasks && subtask.subtasks.length > 0 && (
+          <div className="ml-6">
+            {renderSubtasks(subtask.subtasks, level + 1)}
+          </div>
+        )}
+      </div>
+    ));
+  };
 
   return (
     <Link to={`/task/${id}`}>
@@ -98,6 +141,31 @@ const TaskCard = ({
               </Badge>
             )}
           </div>
+
+          {hasSubtasks && (
+            <Collapsible
+              open={isSubtasksOpen}
+              onOpenChange={setIsSubtasksOpen}
+              className="w-full border rounded-md"
+              onClick={(e) => e.preventDefault()}
+            >
+              <CollapsibleTrigger className="flex items-center justify-between w-full p-2 text-sm font-medium text-left">
+                <div className="flex items-center">
+                  <span>Subtasks ({completedSubtasks}/{totalSubtasks})</span>
+                </div>
+                <div>
+                  {isSubtasksOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-2 text-sm border-t">
+                {renderSubtasks(subtasks)}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
           <div className="flex flex-wrap items-center justify-between pt-2">
             <div className="flex items-center space-x-4">

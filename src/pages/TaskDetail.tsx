@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -28,9 +29,17 @@ import {
   MessageSquare,
   User,
   UserCheck,
+  Plus,
+  CheckSquare,
+  Square,
+  ChevronDown,
+  ChevronUp,
+  X
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SubtaskProps } from "@/components/TaskCard";
 
 // Sample task data
 const taskData = {
@@ -67,6 +76,35 @@ const taskData = {
     },
   ],
   createdAt: "2025-04-10",
+  subtasks: [
+    {
+      id: "1-1",
+      title: "Create header section",
+      completed: true,
+      subtasks: [
+        {
+          id: "1-1-1",
+          title: "Design navigation menu",
+          completed: true,
+        },
+        {
+          id: "1-1-2",
+          title: "Implement responsive logo",
+          completed: false,
+        }
+      ]
+    },
+    {
+      id: "1-2",
+      title: "Build hero section with CTA",
+      completed: false,
+    },
+    {
+      id: "1-3",
+      title: "Create testimonials carousel",
+      completed: false,
+    }
+  ]
 };
 
 // Sample my task data (when the user is the owner)
@@ -75,10 +113,150 @@ const myTaskData = {
   isMyTask: true,
 };
 
+const SubtaskItem = ({ 
+  subtask, 
+  parentId, 
+  level = 0,
+  onToggleComplete,
+  onAddSubtask,
+  onDeleteSubtask,
+  isMyTask
+}: { 
+  subtask: SubtaskProps; 
+  parentId: string;
+  level?: number;
+  onToggleComplete: (id: string) => void;
+  onAddSubtask: (parentId: string) => void;
+  onDeleteSubtask: (id: string) => void;
+  isMyTask: boolean;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const hasSubtasks = subtask.subtasks && subtask.subtasks.length > 0;
+
+  const handleAddSubtask = () => {
+    if (newSubtaskTitle.trim()) {
+      const newSubtask = {
+        id: `${subtask.id}-${Date.now()}`,
+        title: newSubtaskTitle,
+        completed: false
+      };
+      
+      // In a real app, you would update the state properly
+      toast.success(`Added new subtask: ${newSubtaskTitle}`);
+      setNewSubtaskTitle("");
+      setShowAddForm(false);
+    }
+  };
+
+  return (
+    <div className={`border-l-2 pl-${level * 2 + 3} py-2 ${level === 0 ? "border-t mt-2" : ""}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          {isMyTask ? (
+            <button 
+              onClick={() => onToggleComplete(subtask.id)}
+              className="focus:outline-none mr-2"
+            >
+              {subtask.completed ? (
+                <CheckSquare className="h-5 w-5 text-green-500" />
+              ) : (
+                <Square className="h-5 w-5 text-gray-400" />
+              )}
+            </button>
+          ) : (
+            <span className="mr-2">
+              {subtask.completed ? (
+                <CheckSquare className="h-5 w-5 text-green-500" />
+              ) : (
+                <Square className="h-5 w-5 text-gray-400" />
+              )}
+            </span>
+          )}
+          <span className={`${subtask.completed ? "line-through text-gray-500" : ""}`}>
+            {subtask.title}
+          </span>
+        </div>
+        
+        <div className="flex items-center">
+          {isMyTask && (
+            <>
+              <button 
+                onClick={() => onAddSubtask(subtask.id)}
+                className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={() => onDeleteSubtask(subtask.id)}
+                className="ml-2 text-gray-500 hover:text-red-500 focus:outline-none"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </>
+          )}
+          
+          {hasSubtasks && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {hasSubtasks && isExpanded && (
+        <div className="mt-2">
+          {subtask.subtasks!.map((child) => (
+            <SubtaskItem
+              key={child.id}
+              subtask={child}
+              parentId={subtask.id}
+              level={level + 1}
+              onToggleComplete={onToggleComplete}
+              onAddSubtask={onAddSubtask}
+              onDeleteSubtask={onDeleteSubtask}
+              isMyTask={isMyTask}
+            />
+          ))}
+        </div>
+      )}
+      
+      {showAddForm && (
+        <div className="mt-2 flex items-center">
+          <Input
+            value={newSubtaskTitle}
+            onChange={(e) => setNewSubtaskTitle(e.target.value)}
+            placeholder="Enter subtask title"
+            className="mr-2"
+          />
+          <Button size="sm" onClick={handleAddSubtask}>Add</Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => setShowAddForm(false)}
+            className="ml-1"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TaskDetail = () => {
   const { taskId } = useParams();
   const [applicationMessage, setApplicationMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   
   // In a real application, you would fetch the task data based on taskId
   // For this demo, we'll just determine if it's the user's task or not
@@ -115,6 +293,31 @@ const TaskDetail = () => {
   const handleMessageApplicant = (applicantId: string) => {
     // Simulate messaging applicant
     toast.success("Message feature coming soon!");
+  };
+  
+  const handleToggleSubtaskComplete = (subtaskId: string) => {
+    // In a real app, you would update the state properly
+    toast.success(`Toggled subtask ${subtaskId} completion status`);
+  };
+  
+  const handleAddSubtask = (parentId: string) => {
+    // In a real app, you would update the state properly
+    toast.success(`Adding subtask to ${parentId}`);
+  };
+  
+  const handleDeleteSubtask = (subtaskId: string) => {
+    // In a real app, you would update the state properly
+    toast.success(`Deleted subtask ${subtaskId}`);
+  };
+  
+  const handleAddRootSubtask = () => {
+    if (newSubtaskTitle.trim()) {
+      // In a real app, you would update the state properly
+      toast.success(`Added new root subtask: ${newSubtaskTitle}`);
+      setNewSubtaskTitle("");
+    } else {
+      toast.error("Please enter a subtask title");
+    }
   };
 
   return (
@@ -175,6 +378,48 @@ const TaskDetail = () => {
                           {skill}
                         </Badge>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Subtasks Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">Subtasks</h3>
+                      {isMyTask && (
+                        <div className="flex items-center">
+                          <Input
+                            placeholder="New subtask"
+                            value={newSubtaskTitle}
+                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                            className="mr-2 w-64"
+                          />
+                          <Button size="sm" onClick={handleAddRootSubtask}>
+                            <Plus className="h-4 w-4 mr-1" /> Add
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="rounded-lg border bg-card p-4">
+                      {task.subtasks && task.subtasks.length > 0 ? (
+                        <div>
+                          {task.subtasks.map((subtask) => (
+                            <SubtaskItem
+                              key={subtask.id}
+                              subtask={subtask}
+                              parentId="root"
+                              onToggleComplete={handleToggleSubtaskComplete}
+                              onAddSubtask={handleAddSubtask}
+                              onDeleteSubtask={handleDeleteSubtask}
+                              isMyTask={isMyTask}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center text-muted-foreground py-4">
+                          No subtasks created yet
+                        </p>
+                      )}
                     </div>
                   </div>
 

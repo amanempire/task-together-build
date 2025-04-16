@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,35 @@ const sampleTasks: TaskCardProps[] = [
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     },
     status: "open",
+    subtasks: [
+      {
+        id: "1-1",
+        title: "Create header section",
+        completed: true,
+        subtasks: [
+          {
+            id: "1-1-1",
+            title: "Design navigation menu",
+            completed: true,
+          },
+          {
+            id: "1-1-2",
+            title: "Implement responsive logo",
+            completed: false,
+          }
+        ]
+      },
+      {
+        id: "1-2",
+        title: "Build hero section with CTA",
+        completed: false,
+      },
+      {
+        id: "1-3",
+        title: "Create testimonials carousel",
+        completed: false,
+      }
+    ]
   },
   {
     id: "2",
@@ -44,6 +72,23 @@ const sampleTasks: TaskCardProps[] = [
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     },
     status: "open",
+    subtasks: [
+      {
+        id: "2-1",
+        title: "Research competitor logos",
+        completed: true,
+      },
+      {
+        id: "2-2",
+        title: "Create 3 initial concepts",
+        completed: false,
+      },
+      {
+        id: "2-3",
+        title: "Finalize design with revisions",
+        completed: false,
+      }
+    ]
   },
   {
     id: "3",
@@ -84,6 +129,23 @@ const myTasks: TaskCardProps[] = [
     reward: "$250",
     status: "open",
     isMyTask: true,
+    subtasks: [
+      {
+        id: "5-1",
+        title: "Competitive analysis",
+        completed: true,
+      },
+      {
+        id: "5-2",
+        title: "Content calendar for first month",
+        completed: false,
+      },
+      {
+        id: "5-3",
+        title: "KPI definition and tracking plan",
+        completed: false,
+      }
+    ]
   },
   {
     id: "6",
@@ -100,6 +162,28 @@ const myTasks: TaskCardProps[] = [
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       },
     ],
+    subtasks: [
+      {
+        id: "6-1",
+        title: "Edit intro sequence",
+        completed: true,
+      },
+      {
+        id: "6-2",
+        title: "Cut interview segments",
+        completed: true,
+      },
+      {
+        id: "6-3",
+        title: "Add music and sound effects",
+        completed: false,
+      },
+      {
+        id: "6-4",
+        title: "Export final version",
+        completed: false,
+      }
+    ]
   },
 ];
 
