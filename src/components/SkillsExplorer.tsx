@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Tabs, 
@@ -91,7 +90,9 @@ const skillsData = [
           { name: "Figma", level: "intermediate" },
           { name: "Adobe XD", level: "intermediate" },
           { name: "Sketch", level: "advanced" },
-          { name: "Prototyping", level: "intermediate" }
+          { name: "Prototyping", level: "intermediate" },
+          { name: "Wireframing", level: "beginner" },
+          { name: "User Interface Design", level: "intermediate" }
         ]
       },
       {
@@ -102,7 +103,9 @@ const skillsData = [
           { name: "Photoshop", level: "intermediate" },
           { name: "Illustrator", level: "intermediate" },
           { name: "InDesign", level: "advanced" },
-          { name: "Typography", level: "intermediate" }
+          { name: "Typography", level: "intermediate" },
+          { name: "Logo Design", level: "beginner" },
+          { name: "Brand Identity", level: "intermediate" }
         ]
       }
     ]
